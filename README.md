@@ -11,4 +11,4 @@ This repository will contain the code for our paper [Spurious Features Everywher
 
 <p align="center">
   <img width="937" height="1145" src="./example_images/examples_spurious_imagenet.jpg">
-<\p>
+</p>
