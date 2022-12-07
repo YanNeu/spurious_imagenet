@@ -9,3 +9,6 @@ This repository will contain the code for our paper [Spurious Features Everywher
 
 ## The *Spurious ImageNet* Dataset
 
+<p align="center">
+  <img width="1172" height="1432" src="./example_images/examples_spurious_imagenet.jpg">
+<\p>
