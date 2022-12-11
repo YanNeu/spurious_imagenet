@@ -11,7 +11,7 @@ collecting images from the OpenImages dataset which show the spurious feature an
 </p>
 
 ## The *Spurious ImageNet* Dataset
-We selected 40 of our spurious features and collected 75 images from the top-ranked images in OpenImages according to the value of $\alpha_l^(k)$.
+We selected 40 of our spurious features and collected 75 images from the top-ranked images in OpenImages according to the value of $\alpha_l^{(k)}$.
 <p align="center">
   <img width="937" height="1145" src="./example_images/examples_spurious_imagenet.jpg">
 </p>
