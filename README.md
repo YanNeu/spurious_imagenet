@@ -1,5 +1,7 @@
 # Spurious Features Everywhere - Large-Scale Detection of Harmful Spurious Features in ImageNet
 
+:warning: The code and dataset will be uploaded soon! :warning:
+
 This repository will contain the code for our paper [Spurious Features Everywhere - Large-Scale Detection of Harmful Spurious Features in ImageNet] including the *Spurious ImageNet* dataset.
 
 In this paper, we develop a framework that allows us to systematically identify spurious features in large datasets like ImageNet. It is based on our neural PCA components and their visualization.
