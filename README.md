@@ -1,6 +1,6 @@
 # Spurious Features Everywhere - Large-Scale Detection of Harmful Spurious Features in ImageNet
 
-:warning: The code and dataset will be uploaded soon! :warning:
+<p align="center">:warning: The code and dataset will be uploaded soon! :warning:</p>
 
 This repository will contain the code for our paper [Spurious Features Everywhere - Large-Scale Detection of Harmful Spurious Features in ImageNet] including the *Spurious ImageNet* dataset.
 
