@@ -1,6 +1,6 @@
 # Spurious Features Everywhere - Large-Scale Detection of Harmful Spurious Features in ImageNet
 
-This repository will contain the code for our paper [Spurious Features Everywhere - Large-Scale Detection of Harmful Spurious Features in ImageNet] including the *Spurious ImageNet* dataset.
+This repository will contain the code for our paper [Spurious Features Everywhere - Large-Scale Detection of Harmful Spurious Features in ImageNet](https://arxiv.org/abs/2212.04871) including the *Spurious ImageNet* dataset.
 
 In this paper, we develop a framework that allows us to systematically identify spurious features in large datasets like ImageNet. It is based on our neural PCA components and their visualization.
 By applying this framework (including minimal human supervision) to ImageNet, we identified 319 neural PCA components corresponding to spurious features of 230 ImageNet classes. For 40 of these features, we validated our results by 
@@ -11,7 +11,7 @@ collecting images from the OpenImages dataset which show the spurious feature an
 </p>
 
 ## The *Spurious ImageNet* Dataset
-We selected 40 of our spurious features and collected 75 images from the top-ranked images in OpenImages according to the value of $\alpha_l^(k)$, each containing only the spurious feature but not the class object.
+We selected 40 of our spurious features and collected 75 images from the top-ranked images in OpenImages according to the value of $\alpha_l^{(k)}$, each containing only the spurious feature but not the class object.
 This dataset can be used to measure the reliance of image classifiers on spurious features. It has the advantage that it consists of real images and thus provides a realistic impression of the performance of ImageNet classifiers in 
 the wild. 
 
@@ -55,7 +55,7 @@ pip install -e robustness-master
 ```
 
 ### Compute Spurious mAUC
-A classifier $f$ not relying on the spurious feature should predict a low probability for class $k$ for the Spurious ImageNet samples, especially compared to test set images of ImageNet for class $k$. Thus, for each class, we measure the AUC (area under the curve) for the separation of images with the spurious features but not showing class k versus test set images of class k according to the predicted probability for class k. A classifier not depending on the spurious feature should easily attain a perfect AUC of 1. We compute the mean AUC over all 40 classes.
+A classifier $f$ not relying on the spurious feature should predict a low probability for class $k$ for the Spurious ImageNet samples, especially compared to test set images of ImageNet for class $k$. Thus, for each class, we measure the AUC (area under the curve) for the separation of images with the spurious features but not showing class $k$ versus test set images of class $k$ according to the predicted probability for class $k$. A classifier not depending on the spurious feature should easily attain a perfect AUC of 1. We compute the mean AUC over all 40 classes.
 
 Use `dataset/spurious_score.py` and replace `get_model` to evaluate your model. A table with results will be saved as `dataset/spurious_imagenet/evaluation/<*model name*>/spurious_score.txt`:
 
