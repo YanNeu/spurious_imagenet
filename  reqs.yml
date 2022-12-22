@@ -1,0 +1,24 @@
+name: spurious_imagenet
+channels:
+  - anaconda
+  - pytorch
+  - defaults
+dependencies:
+  - captum
+  - cudatoolkit
+  - matplotlib
+  - numpy
+  - pillow
+  - pip
+  - python
+  - pytorch
+  - scikit-learn
+  - pip:
+    - pandas
+    - prettytable
+    - scikit-image
+    - spicy
+    - seaborn
+    - timm
+    - grad-cam
+prefix: /scratch/yannic/fermi/anaconda3/envs/spurious_imagenet
