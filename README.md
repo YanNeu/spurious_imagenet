@@ -60,11 +60,9 @@ A classifier $f$ not relying on the spurious feature should predict a low probab
 Use `dataset/spurious_score.py` and replace `get_model` to evaluate your model. A table with results will be saved as `dataset/spurious_imagenet/evaluation/<*model name*>/spurious_score.txt`:
 
 """
-\*#\* Model
 model_name = "robust_resnet"
 model, img_size = get_model(device, device_ids, model_name)
     
-\*#\* Evaluation
 eval_auc(model, model_name, img_size, device, bs)
 """
 
