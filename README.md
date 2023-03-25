@@ -7,7 +7,7 @@ By applying this framework (including minimal human supervision) to ImageNet, we
 collecting images from the OpenImages dataset which show the spurious feature and do not contain the actual class object but are still classified as this class. 
 
 <p align="center">
-  <img width="505" height="531" src="./example_images/teaser.png">
+  <img width="505" src="./example_images/teaser.png">
 </p>
 
 ## The *Spurious ImageNet* Dataset
@@ -15,17 +15,18 @@ We selected 100 of our spurious features and collected 75 images from the top-ra
 This dataset can be used to measure the reliance of image classifiers on spurious features. It has the advantage that it consists of real images and thus provides a realistic impression of the performance of ImageNet classifiers in 
 the wild. 
 
+### Examples
 <p align="center">
-  <img width="1390" height="1390" src="./example_images/spur_in_overview_0.png">
+  <img width="1390" src="./example_images/spur_in_overview_0.png">
 </p>
 <p align="center">
-  <img width="1390" height="1390" src="./example_images/spur_in_overview_1.png">
+  <img width="1390" src="./example_images/spur_in_overview_1.png">
 </p>
 <p align="center">
-  <img width="1390" height="1390" src="./example_images/spur_in_overview_2.png">
+  <img width="1390" src="./example_images/spur_in_overview_2.png">
 </p>
 <p align="center">
-  <img width="1390" height="1390" src="./example_images/spur_in_overview_3.png">
+  <img width="1390" src="./example_images/spur_in_overview_3.png">
 </p>
 
 ### Setup
