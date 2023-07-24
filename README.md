@@ -83,3 +83,15 @@ eval_auc(model, model_name, img_size, device, bs)
 ## Class-wise Neural PCA
 The folder `neural_pca` contains all code to compute the class-wise neural PCA components of ImageNet classes and corresponding visualisations. The script `neural_pca/example.py` shows how to compute the $\alpha$ values and visualisations for the top 10 components for a given class.
 
+## Citation
+
+```bibtex
+@article{neuhaus2022spurious,
+  title={Spurious Features Everywhere--Large-Scale Detection of Harmful Spurious Features in ImageNet},
+  author={Neuhaus, Yannic and Augustin, Maximilian and Boreiko, Valentyn and Hein, Matthias},
+  journal={arXiv preprint arXiv:2212.04871},
+  year={2022}
+}
+```
+
+
