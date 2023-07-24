@@ -1,4 +1,8 @@
 # Spurious Features Everywhere - Large-Scale Detection of Harmful Spurious Features in ImageNet
+Yannic Neuhaus, Maximilian Augustin, Valentyn Boreiko, Matthias Hein\
+*University of Tübingen*
+
+Accepted to ICCV 2023
 
 This repository will contain the code for our paper [Spurious Features Everywhere - Large-Scale Detection of Harmful Spurious Features in ImageNet](https://arxiv.org/abs/2212.04871) including the *Spurious ImageNet* dataset.
 
