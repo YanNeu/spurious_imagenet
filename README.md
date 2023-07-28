@@ -93,8 +93,8 @@ The folder `neural_pca` contains all code to compute the class-wise neural PCA c
 @article{neuhaus2022spurious,
   title={Spurious Features Everywhere--Large-Scale Detection of Harmful Spurious Features in ImageNet},
   author={Neuhaus, Yannic and Augustin, Maximilian and Boreiko, Valentyn and Hein, Matthias},
-  journal={arXiv preprint arXiv:2212.04871},
-  year={2022}
+  booktitle={ICCV},
+  year={2023}
 }
 ```
 
