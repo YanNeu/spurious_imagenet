@@ -1,5 +1,6 @@
 import sys
 sys.path.insert(0,'..')
+
 import os
 
 import numpy as np
@@ -15,13 +16,14 @@ from timm.data.constants import IMAGENET_DEFAULT_MEAN, IMAGENET_DEFAULT_STD
 from torchvision.datasets import ImageNet
 
 from utils.model_normalization import NormalizationWrapper
-from utils.datasets.imagenet import get_imagenet_path, get_imagenet_labels
+from utils.datasets.imagenet import get_imagenet_path, get_imagenet_labels, get_ImageNet
 from utils.load_trained_model import load_model
 from spurious_projection_wrapper import wrap_model
 from utils.salient_imagenet_model import load_robust_model
 from spurious_dataset import get_spurious_datasets, get_imagenet_matching_subset
 
 from prettytable import PrettyTable
+
 
 spurious_imagenet_dir = 'spurious_imagenet'
 dataset_dir = os.path.join(spurious_imagenet_dir, 'images')
@@ -48,7 +50,6 @@ def get_google_in1k_to_21k_map():
 
 google_in_1k_to_21k = get_google_in1k_to_21k_map()
 google_in_21k_to_1k = {v: k for (k, v) in google_in_1k_to_21k.items()}
-
 
 def get_in1k_to_21k_map():
     in_path = get_imagenet_path()
@@ -93,7 +94,6 @@ def get_probabilities_targets(loader, model, device):
 
     return probabilities, targets
 
-
 def map_index(num_clases, class_idx):
     if num_clases == 1000:
         mapped_idx = class_idx
@@ -111,7 +111,6 @@ def map_index(num_clases, class_idx):
         raise NotImplementedError()
     return mapped_idx
 
-
 def calculate_score_frac_classified_as(probabilities, class_idx, gt_targets):
     idcs_matching = gt_targets == class_idx
     mapped_idx = map_index(probabilities.shape[1], class_idx)
@@ -119,26 +118,6 @@ def calculate_score_frac_classified_as(probabilities, class_idx, gt_targets):
     _, preds = torch.max(probabilities[idcs_matching], dim=1)
     frac_classified_as = torch.mean((preds == mapped_idx).float()).item()
     return scores, frac_classified_as
-
-
-def calculate_tpr_threshold(model, loader, tpr=0.95):
-    dataset_length = len(loader.dataset)
-    confs = torch.zeros(dataset_length, dtype=torch.float)
-
-    idx = 0
-    with torch.no_grad():
-        for data, target in loader:
-            data = data.to(device)
-            idx_next = idx + len(data)
-            out = model(data)
-            probs = torch.softmax(out, dim=1)
-            confs_data, _ = torch.max(probs, dim=1)
-
-            confs[idx:idx_next] = confs_data.detach().cpu()
-            idx = idx_next
-
-    threshold = torch.quantile(confs, (1-tpr)).item()
-    return threshold
 
 
 def calculate_confs_on_correct(probabilities, class_idx, gt_targets):
@@ -241,9 +220,9 @@ def get_model(device, device_ids, model_name):
         model.eval()
         model.to(device)
 
-    if device_ids is not None and len(device_ids) > 1:
-        model = torch.nn.DataParallel(model, device_ids=device_ids)
-        print('Using DataParallel')
+        if device_ids is not None and len(device_ids) > 1:
+            model = torch.nn.DataParallel(model, device_ids=device_ids)
+            print('Using DataParallel')
 
     return model, input_size
 
@@ -264,87 +243,69 @@ def calculate_accuracy(loader, model, device):
         print(f'Accuracy {acc:.3f}')
         return acc
 
+def get_loaders(img_size, bs):
+    spurious_loader = get_spurious_datasets(dataset_dir, img_size=img_size[1], bs=bs, num_workers=8)
+    included_classes = spurious_loader.dataset.included_classes
+    in_subset_loader = get_imagenet_matching_subset(included_classes,
+                                                        img_size=img_size[1], bs=bs, num_workers=8)
+    return spurious_loader, in_subset_loader
 
-def eval_auc(model, model_name, img_size, device, bs):
+def eval_spurious_score(model, model_name, device, spurious_loader, in_subset_loader):
     with open(os.path.join(dataset_dir, 'timestamp.txt'), 'r') as f:
         line = f.readline()
         dataset_timestamp = int(line.rstrip())
 
-    print(f'Evaluating {model_name}...')
     model_results_dir = os.path.join(result_dir, model_name)
     pathlib.Path(model_results_dir).mkdir(parents=True, exist_ok=True)
     info_package_file = os.path.join(model_results_dir, 'info.pth')
 
-    #try to load precomputed results
-    load_info_succes = False
-    if os.path.isfile(info_package_file):
-        info_package = torch.load(info_package_file)
-        if info_package['timestamp'] == dataset_timestamp:
-            try:
-                mean_auc_score = info_package['mean_auc_score']
-                joint_auc_score = info_package['joint_auc_score']
-                model_class_auc_scores = info_package['class_auc_scores']
-                class_in_probability_into = info_package['class_in_probability_into']
-                class_spurious_probability_into = info_package['class_spurious_probability_into']
-                class_in_correct_classified_as = info_package['class_in_correct_classified_as']
-                class_spurious_wrongly_classified_as = info_package['class_spurious_wrongly_classified_as']
-                class_idcs = info_package['class_idcs']
-                load_info_succes = True
-            except KeyError:
-                pass
+    mean_auc_score, joint_auc_score, model_class_auc_scores, \
+    class_in_probability_into, class_spurious_probability_into, \
+    class_in_correct_classified_as, class_spurious_wrongly_classified_as, \
+    class_idcs\
+        = calculate_spurious_score(in_subset_loader, spurious_loader, device, model)
 
-    if not load_info_succes:
-        spurious_loader = get_spurious_datasets(dataset_dir, img_size=img_size[1], bs=bs, num_workers=8)
-        included_classes = spurious_loader.dataset.included_classes
-        in_subset_loader = get_imagenet_matching_subset(included_classes,
-                                                            img_size=img_size[1], bs=bs, num_workers=8)
+    info_package = {
+        'mean_auc_score': mean_auc_score,
+        'joint_auc_score': joint_auc_score,
+        'class_auc_scores': model_class_auc_scores,
+        'class_in_probability_into': class_in_probability_into,
+        'class_spurious_probability_into': class_spurious_probability_into,
+        'class_in_correct_classified_as': class_in_correct_classified_as,
+        'class_spurious_wrongly_classified_as': class_spurious_wrongly_classified_as,
+        'class_idcs': class_idcs,
+        'timestamp': dataset_timestamp,
+    }
+    torch.save(info_package, info_package_file)
 
+    #write txt
+    out_file = os.path.join(model_results_dir, 'spurious_score.txt')
+    with open(out_file, 'w') as f:
+        f.write(f'Mean SpuriousScore: {mean_auc_score:.3f} - Joint SpuriousScore: {joint_auc_score:.3f}\n')
+                
+        pt = PrettyTable()
+        pt.field_names = ['Idx',  'Class', 'Spurious AUC', "Validation Mean Prob", "Spurious Mean Prob",
+                            'Frac Validation labeled as', 'Frac Spurious labeled as']
+        pt.float_format = '.4'
+        for class_idx, class_score, in_prob, spurious_prob, in_frac, spurious_frac\
+                in zip(class_idcs, model_class_auc_scores,
+                        class_in_probability_into, class_spurious_probability_into,
+                        class_in_correct_classified_as, class_spurious_wrongly_classified_as):
 
-        mean_auc_score, joint_auc_score, model_class_auc_scores, \
-        class_in_probability_into, class_spurious_probability_into, \
-        class_in_correct_classified_as, class_spurious_wrongly_classified_as, class_idcs\
-            = calculate_spurious_score(in_subset_loader, spurious_loader, device, model)
+                        pt.add_row([class_idx, in_labels[class_idx], class_score, in_prob, spurious_prob,
+                                   in_frac, spurious_frac])
 
-        info_package = {
-            'mean_auc_score': mean_auc_score,
-            'joint_auc_score': joint_auc_score,
-            'class_auc_scores': model_class_auc_scores,
-            'class_in_probability_into': class_in_probability_into,
-            'class_spurious_probability_into': class_spurious_probability_into,
-            'class_in_correct_classified_as': class_in_correct_classified_as,
-            'class_spurious_wrongly_classified_as': class_spurious_wrongly_classified_as,
-            'class_idcs': class_idcs,
-            'timestamp': dataset_timestamp,
-            }
-        torch.save(info_package, info_package_file)
-
-        #write txt
-        out_file = os.path.join(model_results_dir, 'spurious_score.txt')
-        with open(out_file, 'w') as f:
-            f.write(f'Mean SpuriousScore: {mean_auc_score:.3f} - Joint SpuriousScore: {joint_auc_score:.3f}\n')
-            
-            pt = PrettyTable()
-            pt.field_names = ['Idx',  'Class', 'Spurious AUC', "Validation Mean Prob", "Spurious Mean Prob",
-                              'Frac Validation labeled as', 'Frac Spurious labeled as']
-            pt.float_format = '.4'
-            for class_idx, class_score, in_prob, spurious_prob, in_frac, spurious_frac\
-                    in zip(class_idcs, model_class_auc_scores,
-                           class_in_probability_into, class_spurious_probability_into,
-                           class_in_correct_classified_as, class_spurious_wrongly_classified_as):
-
-                            pt.add_row([class_idx, in_labels[class_idx], class_score, in_prob, spurious_prob,
-                                       in_frac, spurious_frac])
-
-            f.write(pt.get_string())
+        f.write(pt.get_string())
 
 
 def parse_args():
-    parser = argparse.ArgumentParser(description='Parse arguments', prefix_chars ='-')
+    parser = argparse.ArgumentParser(description='Parse arguments', prefix_chars='-')
     parser.add_argument('--gpu', '--list', nargs='+', default=[0],
                         help='GPU indices, if more than 1 parallel modules will be called')
     parser.add_argument('--bs', default=16, type=int,
                     help='batch size.')
     return parser.parse_args()
+
 
 if __name__ == '__main__':
     args = parse_args()
@@ -365,6 +326,6 @@ if __name__ == '__main__':
     model_name = "robust_resnet"
     model, img_size = get_model(device, device_ids, model_name)
     
-    # Evaluation
-    eval_auc(model, model_name, img_size, device, bs)
+    spurious_loader, in_subset_loader = get_loaders(img_size, bs)
+    eval_spurious_score(model, model_name, device, spurious_loader, in_subset_loader)
 
