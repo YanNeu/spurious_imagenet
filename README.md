@@ -1,6 +1,10 @@
 # Spurious Features Everywhere - Large-Scale Detection of Harmful Spurious Features in ImageNet
+Yannic Neuhaus, Maximilian Augustin, Valentyn Boreiko, Matthias Hein\
+*University of Tübingen*
 
-This repository will contain the code for our paper [Spurious Features Everywhere - Large-Scale Detection of Harmful Spurious Features in ImageNet](https://arxiv.org/abs/2212.04871) including the *Spurious ImageNet* dataset.
+Accepted to ICCV 2023
+
+This repository contains the code for our paper [Spurious Features Everywhere - Large-Scale Detection of Harmful Spurious Features in ImageNet](https://arxiv.org/abs/2212.04871) including the *Spurious ImageNet* dataset.
 
 In this paper, we develop a framework that allows us to systematically identify spurious features in large datasets like ImageNet. It is based on our neural PCA components and their visualization.
 By applying this framework (including minimal human supervision) to ImageNet, we identified 319 neural PCA components corresponding to spurious features of 230 ImageNet classes. For 100 of these features, we validated our results by 
@@ -82,4 +86,16 @@ eval_auc(model, model_name, img_size, device, bs)
 
 ## Class-wise Neural PCA
 The folder `neural_pca` contains all code to compute the class-wise neural PCA components of ImageNet classes and corresponding visualisations. The script `neural_pca/example.py` shows how to compute the $\alpha$ values and visualisations for the top 10 components for a given class.
+
+## Citation
+
+```bibtex
+@article{neuhaus2022spurious,
+  title={Spurious Features Everywhere--Large-Scale Detection of Harmful Spurious Features in ImageNet},
+  author={Neuhaus, Yannic and Augustin, Maximilian and Boreiko, Valentyn and Hein, Matthias},
+  booktitle={ICCV},
+  year={2023}
+}
+```
+
 
