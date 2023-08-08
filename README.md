@@ -57,19 +57,20 @@ def get_imagenet_path():
 Download the weights from [here](https://drive.google.com/file/d/169fhxn5X2_1-5vWTepkKJZRMdr8z4b9p/view?usp=sharing) into `utils` and unzip the model.
 
 ### Required Packages
-Required packages are listed in `reqs.yml`. The `robustness` package needs to be installed from the corresponding github repo:
+Required packages are listed in `reqs.yml`. The environment enables full usage of the benchmark and the transfer SpuFix.
 ```
 conda env create -f reqs.yml
 conda activate spurious_imagenet
+```
+
+(Optional) The `robustness` package has to be installed from the corresponding github repo. This is only needed for loading the robust ResNet50:
+```
 cd utils
 wget https://github.com/MadryLab/robustness/archive/refs/heads/master.zip
 unzip master.zip
 rm master.zip
 pip install -e robustness-master
 ```
-
-❗Models from timm updates after Oct 10, 2022 require 0.8.x pre-releases (`pip install --pre timm`) or cloning the main branch of [its](https://github.com/huggingface/pytorch-image-models) GitHub repository❗
-
 
 ### Compute Spurious mAUC
 A classifier $f$ not relying on the spurious feature should predict a low probability for class $k$ for the Spurious ImageNet samples, especially compared to test set images of ImageNet for class $k$. Thus, for each class, we measure the AUC (area under the curve) for the separation of images with the spurious features but not showing class $k$ versus test set images of class $k$ according to the predicted probability for class $k$. A classifier not depending on the spurious feature should easily attain a perfect AUC of 1. We compute the mean AUC over all 40 classes.
