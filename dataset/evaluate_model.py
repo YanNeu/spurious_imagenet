@@ -40,7 +40,7 @@ if __name__ == '__main__':
     
     evaluate your own models:
         - replace the get_model function
-        - model should include a normalization wrapper
+        - model should include a normalization wrapper (see utils.model_normalization.py)
         - img_size format (3, <size>, <size>)
     """
 

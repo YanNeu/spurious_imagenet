@@ -16,7 +16,7 @@ from timm.data.constants import IMAGENET_DEFAULT_MEAN, IMAGENET_DEFAULT_STD
 from torchvision.datasets import ImageNet
 
 from utils.model_normalization import NormalizationWrapper
-from utils.datasets.imagenet import get_imagenet_path, get_imagenet_labels, get_ImageNet
+from utils.datasets.imagenet import get_imagenet_path, get_imagenet_labels
 from utils.load_trained_model import load_model
 from spurious_projection_wrapper import wrap_model
 from utils.salient_imagenet_model import load_robust_model
@@ -185,10 +185,7 @@ def calculate_spurious_score(in_loader, out_loader, device, model):
 
 
 def get_model(device, device_ids, model_name):
-    if model_name == 'spurious_projection_robust_resnet':
-        model, input_size = get_model(device, None, 'robust_resnet')
-        model = wrap_model(model, device)
-    elif model_name == 'robust_resnet':
+    if model_name == 'robust_resnet':
         model_description = ('PytorchResNet50', 'l2_improved_3_ep', 'best', 0.7155761122703552, False)
         type, model_folder, model_checkpoint, temperature, temp = model_description
         model = load_model(type, model_folder, model_checkpoint, temperature, device, load_temp=temp,

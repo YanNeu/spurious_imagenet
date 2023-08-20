@@ -54,6 +54,7 @@ class SpuriousDataset(Dataset):
         label = self.targets[internal_idx]
         return img, label
 
+
 def get_spurious_datasets(dataset_dir, img_size=224, interpolation=InterpolationMode.BICUBIC, bs=128, num_workers=1):
     transform = get_imageNet_augmentation(type='no_crop', out_size=img_size, interpolation=interpolation)
     dataset = SpuriousDataset(dataset_dir, transform)
@@ -70,8 +71,9 @@ def get_spurious_datasets_crop_resize(dataset_dir, img_size=224, interpolation=I
     loader = DataLoader(dataset, batch_size=bs,  shuffle=False, num_workers=num_workers)
     return loader
 
-def get_imagenet_matching_subset(included_classes, img_size=224, bs=128, num_workers=1):
-    transform = get_imageNet_augmentation(type='test', out_size=img_size)
+
+def get_imagenet_matching_subset(included_classes, img_size=224, interpolation=InterpolationMode.BICUBIC, bs=128, num_workers=1):
+    transform = get_imageNet_augmentation(type='test', out_size=img_size, interpolation=interpolation)
     in_path = get_imagenet_path()
     imagenet = ImageNet(in_path, split='val', transform=transform)
 
