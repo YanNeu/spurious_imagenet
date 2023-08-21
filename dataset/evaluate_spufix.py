@@ -33,7 +33,7 @@ def parse_args():
                         help='GPU indices, if more than 1 parallel modules will be called')
     parser.add_argument('--bs', default=64, type=int,
                     help='batch size.')
-    parser.add_argument('--model', type=str, default='robust_resnet')
+    parser.add_argument('--model_id', type=str, default='robust_resnet')
     parser.add_argument('--load_act', action='store_true')
     parser.add_argument('--load_direction', action='store_true')
     return parser.parse_args()
@@ -60,11 +60,12 @@ if __name__ == '__main__':
         - make sure the model's architecture is implemented in utils.get_last_layer.py
     """
 
-    model_name = args.model
+    model_name = args.model_id
     model, img_size = get_model(device, device_ids, model_name)
     
     multi_gpu  = not device_ids is None
     last_layer = get_last_layer(model_name, model, multi_gpu)
+    
     bs = args.bs
     if not args.load_direction:
         # compute penultimate layer features on training images
