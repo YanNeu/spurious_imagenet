@@ -4,7 +4,8 @@
 # This source code is licensed under the license found in the
 # LICENSE file in the root directory of this source tree
 #
-
+import sys
+sys.path.append('../..')
 from audioop import bias
 from importlib.metadata import requires
 import time
@@ -16,8 +17,8 @@ import math
 import numpy as np
 from tqdm import tqdm
 
-import seed as rnd_sd
-from activations import activations_with_grad
+import neural_pca.seed as rnd_sd
+from neural_pca.activations import activations_with_grad
 
 from .other_utils import L0_norm, L1_norm, L2_norm
 

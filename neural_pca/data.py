@@ -1,135 +1,37 @@
+import sys 
+sys.path.append('..')
+
 import torch
-import torchvision
 import torchvision.transforms as T
-from torch.utils.data import DataLoader
+from torchvision.datasets import ImageNet
+from torch.utils.data import DataLoader, Subset
 
 from PIL import Image
-import numpy as np
-import json
-import math
 
-from robustness import datasets
-from robustness.tools.imagenet_helpers import ImageNetHierarchy, common_superclass_wnid
-
+from utils.datasets.augmentations.imagenet_augmentation import get_imageNet_augmentation
 from utils.datasets.paths import get_imagenet_path
 
 data_dir = "../data"
 
 
-def big_cats(batch_size, n_workers):
-    # Collect WordNet id for 'big cat'
-    data_path = get_imagenet_path()
-    data_info_path = '../data/IN_info'
+def get_imagenet_subset(class_id, split, img_size=224, bs=128, num_workers=1):
+    transform = get_imageNet_augmentation(type='test', out_size=img_size)
+    in_path = get_imagenet_path()
 
-    imagenet_hier = ImageNetHierarchy(data_path, data_info_path)
+    imagenet = ImageNet(in_path, split=split, transform=transform)
 
-    big_cat_wnid = 'n02127808'
-    #big_cat_descendents = imagenet_hier.get_descendants(big_cat_wnid)
-    #print('big cat descendents:')
-    #for i, desc in enumerate(big_cat_descendents):
-    #    print(f'[{i}] wnid: {desc} name: {imagenet_hier.wnid_to_name[desc]}')
+    subset_idcs = torch.zeros(len(imagenet), dtype=torch.bool)
+    in_targets = torch.LongTensor(imagenet.targets)
+    subset_idcs[in_targets == class_id] = 1
 
-    #class_ranges, label_map = imagenet_hier.get_subclasses([big_cat_wnid])
-    #print(class_ranges)
-    class_ranges = [[288], [289], [290], [291], [292], [293]]
+    subset_idcs = torch.nonzero(subset_idcs, as_tuple=False).squeeze()
+    in_subset = Subset(imagenet, subset_idcs)
 
-    # Create big cat datset and dataloaders
-    big_cat_dataset = datasets.CustomImageNet(data_path, class_ranges)
-    train_loader, test_loader = big_cat_dataset.make_loaders(
-        workers=n_workers,
-        batch_size=batch_size,
-        data_aug=False,
-        shuffle_train=True,
-        shuffle_val=True)
-    
-    return train_loader, test_loader, class_ranges
+    loader = DataLoader(in_subset, batch_size=bs, shuffle=False, num_workers=num_workers)
+    return loader
 
 
-def granny_smith(batch_size, n_workers, shuffle=False):
-    """
-    Returns train and test loader for Granny Smith (subset of ImageNet).
-
-    Arguments:
-        batch_size: int - size of batches yielded by the dataloaders
-        n_workers: int - number of workers used by the dataloaders
-        shuffle: bool - by default, the datapoints are not shuffled
-    Returns:
-        train_loader: torch.DataLoader - training points and labels
-        test_loader: torch.DataLoader - test points and labels
-    """
-    granny_smith_id = 948
-    class_ranges = [[granny_smith_id]]
-    data_path = get_imagenet_path()
-
-    # Create big cat datset and dataloaders
-    granny_smith_dataset = datasets.CustomImageNet(data_path, class_ranges)
-    train_loader, test_loader = granny_smith_dataset.make_loaders(
-        workers=n_workers,
-        batch_size=batch_size,
-        data_aug=False,
-        shuffle_train=False,
-        shuffle_val=False)
-    
-    return train_loader, test_loader
-
-
-def white_shark(batch_size, n_workers, shuffle=False):
-    """
-    Returns train and test loader for White Shark (subset of ImageNet).
-
-    Arguments:
-        batch_size: int - size of batches yielded by the dataloaders
-        n_workers: int - number of workers used by the dataloaders
-        shuffle: bool - by default, the datapoints are not shuffled
-    Returns:
-        train_loader: torch.DataLoader - training points and labels
-        test_loader: torch.DataLoader - test points and labels
-    """
-    white_shark_id = 2
-    class_ranges = [[white_shark_id]]
-    data_path = get_imagenet_path()
-
-    # Create big cat datset and dataloaders
-    white_shark_dataset = datasets.CustomImageNet(data_path, class_ranges)
-    train_loader, test_loader = white_shark_dataset.make_loaders(
-        workers=n_workers,
-        batch_size=batch_size,
-        data_aug=False,
-        shuffle_train=False,
-        shuffle_val=False)
-    
-    return train_loader, test_loader
-
-
-def tench(batch_size, n_workers, shuffle=False):
-    """
-    Returns train and test loader for Tench (subset of ImageNet).
-
-    Arguments:
-        batch_size: int - size of batches yielded by the dataloaders
-        n_workers: int - number of workers used by the dataloaders
-        shuffle: bool - by default, the datapoints are not shuffled
-    Returns:
-        train_loader: torch.DataLoader - training points and labels
-        test_loader: torch.DataLoader - test points and labels
-    """
-    tench_id = 0
-    class_ranges = [[tench_id]]
-    data_path = get_imagenet_path()
-
-    # Create big cat datset and dataloaders
-    tench_dataset = datasets.CustomImageNet(data_path, class_ranges)
-    train_loader, test_loader = tench_dataset.make_loaders(
-        workers=n_workers,
-        batch_size=batch_size,
-        data_aug=False,
-        shuffle_train=False,
-        shuffle_val=False)
-    
-    return train_loader, test_loader
-
-
-def imagenet_subset(class_id, batch_size, n_workers, shuffle=False):
+def imagenet_subset(class_id, batch_size, n_workers, img_size=224, only_train=False):
     """
     Returns train and test loader for the class corresponding to the given id (subset of ImageNet).
 
@@ -140,268 +42,14 @@ def imagenet_subset(class_id, batch_size, n_workers, shuffle=False):
         shuffle: bool - by default, the datapoints are not shuffled
     Returns:
         train_loader: torch.DataLoader - training points and labels
-        test_loader: torch.DataLoader - test points and labels
+        val_loader: torch.DataLoader - validation points and labels
     """
-    class_ranges = [[class_id]]
-    data_path = get_imagenet_path()
-
-    # Create big cat datset and dataloaders
-    dataset = datasets.CustomImageNet(data_path, class_ranges)
-
-    train_loader, test_loader = dataset.make_loaders(
-        workers=n_workers,
-        batch_size=batch_size,
-        data_aug=False,
-        shuffle_train=False,
-        shuffle_val=False)
+    train_loader = get_imagenet_subset(class_id, 'train', img_size=img_size, bs=batch_size, num_workers=n_workers)
+    if only_train:
+        return train_loader
     
-    return train_loader, test_loader
-
-
-def celeba_attribute(attribute, train=True, valid=True, test=True):
-    """
-    Loads training, validation, and test set of the CelebA dataset 
-    with the given attribute as target.
-
-    Args:
-        attribute: int - Index of the attribute that will be used as target.
-        train: bool - If True, training data will be returned.
-        valid: bool - If True, validation data will be returned.
-        test: bool - If True, testing data will be returned.
-
-    Returns:
-        data: dict - Keys are in ["train", "valid", "test"] containing the (Pytorch) dataset 
-    """
-    def transform_target(target):
-        if len(target.shape) == 1:
-            return target[attribute]
-        return target[:, attribute]
-    
-    data = {}
-
-    if train:
-        data["train"] = torchvision.datasets.CelebA(
-            root=data_dir,
-            split="train",
-            download=False,
-            transform=torchvision.transforms.ToTensor(),
-            target_transform=transform_target
-        )
-
-    if valid:   
-        data["valid"] = torchvision.datasets.CelebA(
-            root=data_dir,
-            split="valid",
-            download=False,
-            transform=torchvision.transforms.ToTensor(),
-            target_transform=transform_target
-        )
-
-    if test:
-        data["test"] = torchvision.datasets.CelebA(
-            root=data_dir,
-            split="test",
-            download=False,
-            transform=torchvision.transforms.ToTensor(),
-            target_transform=transform_target
-        )
-
-    return data
-
-def celeba_blond():
-    """
-    Loads train, valid and test set for the CelebA dataset 
-    with target Male (spurious feature Blond_hair).
-
-    Returns:
-        data: dict - Keys are in ["train", "valid", "test"] containing the (Pytorch) dataset
-    """
-    return celeba_attribute(20)
-
-
-def celeba_grey():
-    """
-    Loads train, valid and test set for the CelebA dataset 
-    with target Grey_hair.
-    
-    Returns:
-        data: dict - Keys are in ["train", "valid", "test"] containing the (Pytorch) dataset
-    """
-    return celeba_attribute(17)
-
-
-class SquareMNIST(torch.utils.data.Dataset):
-    def __init__(self, size, n_spurious, spurious_feature):
-        indices_0_1 = json.load(open("../data/mnist/mnist_0_1_image_ids.json"))
-        self.data = torchvision.datasets.MNIST(
-            root=data_dir,
-            download=True,
-            transform=torchvision.transforms.ToTensor()
-        )
-        self.data = torch.utils.data.Subset(self.data, indices_0_1)
-        assert size <= 28
-        self.square_size = size
-        assert n_spurious <= 6000
-        self.n_spurious = n_spurious
-        assert spurious_feature in [0,1]
-        self.spurious_feature = spurious_feature
-
-    def __len__(self):
-        return len(self.data)
-
-    def __getitem__(self, idx):
-        img, lab = self.data[idx]
-        if self.spurious_feature == 0 and idx < self.n_spurious:
-            return self._add_square(img, self.square_size), lab
-        if self.spurious_feature == 1 and idx >= 6000 and idx < self.n_spurious + 6000:
-            return self._add_square(img, self.square_size), lab
-        return img, lab
-
-    def _add_square(self, img, size):
-        square = torch.zeros((28,28))
-        square[:size, :size] = 1
-        return img + square
-
-
-def square_mnist(size, n_spurious, spurious_feature, split=True):
-    """
-    Loads MNIST data for the classes 0 and 1. A small square (spurious feature) is added to
-    some of the training images belonging to one of the classes.
-
-    Args:
-        size: int - Length of the square in pixel.
-        n_spurious: int - Number of training images where the spurious feature is added
-        spurious_feature: 0 or 1: The spurious features are added to images of this class.
-        split: bool - If True, the data will be split 80/10/10 (train/valid/test).
-
-    Returns:
-        data: dict - Keys are in ["train", "valid", "test"] containing the (Pytorch) dataset 
-    """    
-    dataset = SquareMNIST(size, n_spurious, spurious_feature)
-    
-    data = {}
-    n_zeros = 6000
-    perm_0 = torch.randperm(n_zeros)
-    perm_1 = torch.randperm(n_zeros) + n_zeros
-
-    if split:
-        idx_train = torch.cat((perm_0[:int(0.8*n_zeros)],perm_1[:int(0.8*n_zeros)]))
-        idx_valid = torch.cat((perm_0[int(0.8*n_zeros):int(0.9*n_zeros)],perm_1[int(0.8*n_zeros):int(0.9*n_zeros)]))
-        idx_test = torch.cat((perm_0[int(0.9*n_zeros):],perm_0[int(0.9*n_zeros):]))
-        
-        data["train"] = torch.utils.data.Subset(dataset, idx_train)
-        data["valid"] = torch.utils.data.Subset(dataset, idx_valid)
-        data["test"] = torch.utils.data.Subset(dataset, idx_test)
-
-        return data
-
-    data["train"] = torch.utils.data.Subset(dataset, perm_0+perm_1)
-
-    return data
-
-
-class ColorMNIST(torch.utils.data.Dataset):
-    def __init__(self, frac_spurious):
-        indices_0_1 = json.load(open("../data/mnist/mnist_0_1_image_ids.json"))
-        self.data = torchvision.datasets.MNIST(
-            root=data_dir,
-            download=True,
-            transform=torchvision.transforms.ToTensor()
-        )
-        self.data = torch.utils.data.Subset(self.data, indices_0_1)
-        assert frac_spurious >= 0 and frac_spurious <= 1
-        self.frac_spurious = frac_spurious
-        
-    def __len__(self):
-        return len(self.data)
-
-    def __getitem__(self, idx):
-        img, lab = self.data[idx]
-        idx_0 = 0
-        
-        idx_0_red = idx_0 + self.frac_spurious/2 * 6000
-        if idx < math.floor(idx_0_red):
-            return self._rgb_img(img, "red"), lab
-        
-        idx_0_purple = idx_0_red + self.frac_spurious/2 * 6000
-        if idx < math.floor(idx_0_purple):
-            return self._rgb_img(img, "purple"), lab
-        
-        idx_0_green = idx_0_purple + (1-self.frac_spurious)/2 * 6000
-        if idx < math.floor(idx_0_green):
-            return self._rgb_img(img, "green"), lab
-
-        idx_0_pink = idx_0_green + (1-self.frac_spurious)/2 * 6000
-        if idx < math.floor(idx_0_pink):
-             return self._rgb_img(img, "pink"), lab
-
-        idx_1_red = idx_0_pink + (1-self.frac_spurious)/2 * 6000
-        if idx < math.floor(idx_1_red):
-            return self._rgb_img(img, "red"), lab        
-        
-        idx_1_purple = idx_1_red + (1-self.frac_spurious)/2 * 6000
-        if idx < math.floor(idx_1_purple):
-            return self._rgb_img(img, "purple"), lab
-
-        idx_1_green = idx_1_purple + self.frac_spurious/2 * 6000
-        if idx < math.floor(idx_1_green):
-            return self._rgb_img(img, "green"), lab
-        else:
-            return self._rgb_img(img, "pink"), lab
-
-    def _rgb_img(self, img, color):
-        rgb_img = torch.ones((28,28,3))
-
-        if color == "red":
-            rgb_img = torch.ones((28,28,3)) *  torch.tensor([1, 0, 0])
-        if color == "green":
-            rgb_img = torch.ones((28,28,3)) * torch.tensor([0, 1, 0])
-        if color == "pink":
-            rgb_img = torch.ones((28,28,3)) * torch.tensor([1,0.5,1])
-        if color == "purple":
-            rgb_img = torch.ones((28,28,3)) * torch.tensor([0.5,0,1])
-        
-        if len(img.shape)>2:
-            rgb_img[img[0] > 0] = 255
-        else: 
-            rgb_img[img > 0] = 255
-        return rgb_img
-
-
-def color_mnist(frac_spurious, split=True):
-    """
-    Loads MNIST RGB data for the classes 0 and 1. The backgrounds are colored in red, purple, pink, or green.
-    Most of the images with class zero have red or purple background, most of the images with class one have
-    pink or green background.
-
-    Args:
-        frac_spurious: float - Fraction of the images that have the spuriously colored background.
-        split: bool - If True, the data will be split 80/10/10 (train/valid/test).
-
-    Returns:
-        data: dict - Keys are in ["train", "valid", "test"] containing the (Pytorch) dataset 
-    """    
-    dataset = ColorMNIST(frac_spurious)
-    
-    data = {}
-    n_zeros = 6000
-    perm_0 = torch.randperm(n_zeros)
-    perm_1 = torch.randperm(n_zeros) + n_zeros
-
-    if split:
-        idx_train = torch.cat((perm_0[:int(0.8*n_zeros)],perm_1[:int(0.8*n_zeros)]))
-        idx_valid = torch.cat((perm_0[int(0.8*n_zeros):int(0.9*n_zeros)],perm_1[int(0.8*n_zeros):int(0.9*n_zeros)]))
-        idx_test = torch.cat((perm_0[int(0.9*n_zeros):],perm_0[int(0.9*n_zeros):]))
-        
-        data["train"] = torch.utils.data.Subset(dataset, idx_train)
-        data["valid"] = torch.utils.data.Subset(dataset, idx_valid)
-        data["test"] = torch.utils.data.Subset(dataset, idx_test)
-
-        return data
-
-    data["train"] = torch.utils.data.Subset(dataset, perm_0+perm_1)
-
-    return data
+    val_loader = get_imagenet_subset(class_id, 'val', img_size=img_size, bs=batch_size, num_workers=n_workers)
+    return train_loader, val_loader
 
 
 def imagenet_resize(image):

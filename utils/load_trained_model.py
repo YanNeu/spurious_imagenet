@@ -187,8 +187,8 @@ def load_model(type, folder, checkpoint, temperature, device, dataset='cifar10',
 
     if type in non_native_model:
         model = load_non_native_model(type, folder, device)
-        #if temperature is not None:
-        #    model = TemperatureWrapper(model, temperature)
+        if temperature is not None:
+            model = TemperatureWrapper(model, temperature)
         return model
     if 'BiT' in type:
         model = load_big_transfer_model(type, folder, checkpoint, device, dataset_dir, num_classes, load_temp=load_temp)

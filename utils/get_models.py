@@ -8,10 +8,7 @@ from dataset.spurious_projection_wrapper import wrap_model
 
 
 def get_model(device, device_ids, model_name):
-    if model_name == 'spurious_projection_robust_resnet':
-        model, input_size = get_model(device, None, 'robust_resnet')
-        model = wrap_model(model, device)
-    elif model_name == 'robust_resnet':
+    if model_name == 'robust_resnet':
         model_description = ('PytorchResNet50', 'l2_improved_3_ep', 'best', 0.7155761122703552, False)
         type, model_folder, model_checkpoint, temperature, temp = model_description
         model = load_model(type, model_folder, model_checkpoint, temperature, device, load_temp=temp,
@@ -43,8 +40,8 @@ def get_model(device, device_ids, model_name):
         model.eval()
         model.to(device)
 
-    if device_ids is not None and len(device_ids) > 1:
-        model = torch.nn.DataParallel(model, device_ids=device_ids)
-        print('Using DataParallel')
+        if device_ids is not None and len(device_ids) > 1:
+            model = torch.nn.DataParallel(model, device_ids=device_ids)
+            print('Using DataParallel')
 
     return model, input_size

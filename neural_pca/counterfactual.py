@@ -1,14 +1,17 @@
 """
 Based on https://github.com/valentyn1boreiko/SVCEs_code by Valentyn Boreiko.
 """
+import sys
+sys.path.append('../')
+
 import os
 import torch
 from PIL import Image
 import numpy as np
 import matplotlib.pyplot as plt
 
-from adversarial_attacks.act_apgd import ActivationAPGDAttack
-import data
+from neural_pca.adversarial_attacks.act_apgd import ActivationAPGDAttack
+import neural_pca.data
 
 def generate_feature_counterfactuals(
     model,
