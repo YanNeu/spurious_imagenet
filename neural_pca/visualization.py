@@ -70,7 +70,7 @@ class WeightedActivationPCTarget:
         return model_out[self.pc_dim]
 
 
-def visualise_components(class_idx, device, batchsize, n_components=10, load_act_space=False, load_conf=False):
+def visualize_components(class_idx, device, batchsize, n_components=10, load_act_space=False, load_conf=False):
     config = {
         'target_class':class_idx,
         'loss':'obj_full',

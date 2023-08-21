@@ -8,10 +8,10 @@ from PIL import Image
 from utils.load_trained_model import load_model
 from utils.temperature_wrapper import TemperatureWrapper
 
-from counterfactual import create_results_dir
-from activation_space import ActivationSpace
-from data import imagenet_label2class, imagenet_subset
-from visualisation import visualise_components
+from neural_pca.counterfactual import create_results_dir
+from neural_pca.activation_space import ActivationSpace
+from neural_pca.data import imagenet_label2class, imagenet_subset
+from neural_pca.visualization import visualize_components
 
 device = torch.device('cuda:0')
 
@@ -48,5 +48,5 @@ alphas = act_space.transform(img)
 print(f'alpha {alphas[component_idx].item()}')
 print(f'Max value in training set {torch.max(act_space.pca_train[:, component_idx]).item()}')
 
-# Visualise top 10 components of this class
-visualise_components(target_class, device, batchsize=batchsize)
+# Visualize top 10 components of this class
+visualize_components(target_class, device, batchsize=batchsize)
