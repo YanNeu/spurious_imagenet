@@ -62,8 +62,9 @@ A classifier $f$ not relying on the spurious feature should predict a low probab
   <img width="1390" src="./example_images/scatter_spufix_vector.jpg", alt="spurious imagenet results scatter plot">
 </p>
 
+<a id="evaluate"></a>
 
-### Evaluate your model <a id="evaluate"></a>
+### Evaluate your model 
 Use `dataset/evaluate_model.py` and replace `get_model` to evaluate your model. For pre-trained models from the timm library you can just set `model_name` accordingly instead. A table with results will be saved as `dataset/spurious_imagenet/evaluation/<*model name*>/spurious_score.txt`:
 
 ```
