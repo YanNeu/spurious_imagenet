@@ -153,7 +153,7 @@ Run
 ```
 bash setup_download.sh
 ```
-to download the images and precomputed alpha values (required for SpuFix).
+to download the images and precomputed alpha values (required for *SpuFix*).
 
 
 <a id="create-env"></a>
