@@ -133,7 +133,7 @@ python evaluate_spufix.py --gpu 0 1 --bs 64 --model_id 'resnet101' --load_direct
 <a id="neural-pca"></a>
 
 ## Class-wise Neural PCA 
-The folder `neural_pca` contains all code to compute the class-wise neural PCA components of ImageNet classes and corresponding visualisations. The script `neural_pca/example.py` shows how to compute the $\alpha$ values and visualisations for the top 10 components for a given class.
+The folder `neural_pca` contains all code to compute the class-wise neural PCA components of ImageNet classes and corresponding visualisations. The script `neural_pca/example.py` shows how to compute the $\alpha$ values and visualizations for the top 10 components for a given class.
 
 <a id="setup"></a>
 
