@@ -161,9 +161,17 @@ to download the images and precomputed alpha values (required for *SpuFix*).
 #### Create conda environment 
 Run
 ```
-bash setup_conda.sh
+conda env create -f reqs.yml
+conda activate spurious_imagenet
 ```
-to install the conda environment `spurious_imagenet`.
+to install the conda environment `spurious_imagenet`. The robustness package has to be installed using:
+```
+cd utils
+wget https://github.com/MadryLab/robustness/archive/refs/heads/master.zip
+unzip master.zip
+rm master.zip
+pip install -e robustness-master
+```
 
 
 <a id="path"></a>
