@@ -4,7 +4,6 @@ from timm.data.constants import IMAGENET_DEFAULT_MEAN, IMAGENET_DEFAULT_STD
 from utils.load_trained_model import load_model
 from utils.salient_imagenet_model import load_robust_model
 from utils.model_normalization import NormalizationWrapper
-from dataset.spurious_projection_wrapper import wrap_model
 
 
 def get_model(device, device_ids, model_name):

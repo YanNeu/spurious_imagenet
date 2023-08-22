@@ -18,7 +18,6 @@ from torchvision.datasets import ImageNet
 from utils.model_normalization import NormalizationWrapper
 from utils.datasets.imagenet import get_imagenet_path, get_imagenet_labels
 from utils.load_trained_model import load_model
-from spurious_projection_wrapper import wrap_model
 from utils.salient_imagenet_model import load_robust_model
 from spurious_dataset import get_spurious_datasets, get_imagenet_matching_subset
 
