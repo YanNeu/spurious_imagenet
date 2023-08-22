@@ -78,7 +78,7 @@ Use `dataset/evaluate_model.py` and replace `get_model` to evaluate your model. 
 
 ```
 
-<a id="#example-images"></a>
+<a id="example-images"></a>
 
 ### Example images 
 <p align="center">
@@ -95,13 +95,13 @@ Use `dataset/evaluate_model.py` and replace `get_model` to evaluate your model. 
 </p>
 
 
-<a id="#spufix"></a>
+<a id="spufix"></a>
 
 ### SpuFix
 SpuFix mitigates the reliance of any ImageNet classifier on the spurious features detected in this work without requiring additional labeling or re-training of the models. Follow the instructions below to compute the SpuFix wrapper for your ImageNet model and evaluate it on the *Spurious ImageNet* benchmark:
 
 
-<a id="#spufix-wrapper"></a>
+<a id="spufix-wrapper"></a>
 
 #### Compute SpuFix wrapper for your model 
 You will find the code to create the SpuFix wrapper for your own model in the file `spufix/spufix_wrapper.py`. For pre-trained models from the timm library it is sufficient to provide the `model_id`. For other models, just replace the functions `get_model` and `get_last_layer` with your model and its last (linear) layer (`img_size` should contain the input size of your model in the format `(3, <size>, <size>)`). 
@@ -121,7 +121,7 @@ python spufix_wrapper.py --gpu 0 1 --bs 64 --model_id 'resnet101'
 will pre-compute the wrapper for a pre-trained ResNet101 from timm. Afterwards, you can load it using the `load_spufix_model` function (see `spufix/spufix_wrapper.py` for details).
 
 
-<a id="#evaluate-spufix"></a>
+<a id="evaluate-spufix"></a>
 
 #### Evaluate your SpuFix model
 Evaluate your SpuFix model with the script `dataset/evaluate_spufix.py`. Just provide the model, its input size and its last layer analogously to `spufix/spufix_wrapper.py` (for pre-trained timm models it is sufficient to set `--model_id` accordingly). Call the script with the argument `--load_direction` if you already computed the SpuFix wrapper. Here is an example to evaluate the pre-trained ResNet101 from timm on two CUDA GPUs with batchsize 64:
@@ -130,8 +130,12 @@ Evaluate your SpuFix model with the script `dataset/evaluate_spufix.py`. Just pr
 python evaluate_spufix.py --gpu 0 1 --bs 64 --model_id 'resnet101' --load_direction
 ```
 
+<a id="neural-pca"></a>
 
-<a id="#setup"></a>
+## Class-wise Neural PCA 
+The folder `neural_pca` contains all code to compute the class-wise neural PCA components of ImageNet classes and corresponding visualisations. The script `neural_pca/example.py` shows how to compute the $\alpha$ values and visualisations for the top 10 components for a given class.
+
+<a id="setup"></a>
 
 ### Setup 
 
@@ -142,7 +146,7 @@ cd spurious_imagenet
 ```
 
 
-<a id="#download-data"></a>
+<a id="download-data"></a>
 
 #### Download data 
 Run 
@@ -152,7 +156,7 @@ bash setup_download.sh
 to download the images and precomputed alpha values (required for SpuFix).
 
 
-<a id="#create-env"></a>
+<a id="create-env"></a>
 
 #### Create conda environment 
 Run
@@ -162,7 +166,7 @@ bash setup_conda.sh
 to install the conda environment `spurious_imagenet`.
 
 
-<a id="#path"></a>
+<a id="path"></a>
 
 #### Adjust `imagenet_path` 
 Open `utils/datasets/paths.py` and adjust the `base_data_path` in line 6, the default value is `/scratch/datasets/`. Note that we assume that you have extracted ILSVRC2012 to `base_data_path/imagenet`. If this does not match your folder layout, you can also directly manipulate `get_imagenet_path` in line 64. For example if your dataset is located in `/home/user/datasets/ilsvrc2012/` you could change the function to:
@@ -173,18 +177,14 @@ def get_imagenet_path():
     return path
 ```
 
-<a id="#robust-resnet"></a>
+<a id="robust-resnet"></a>
 
 #### Download Robust ResNet50 
 Download the weights from [here](https://drive.google.com/file/d/169fhxn5X2_1-5vWTepkKJZRMdr8z4b9p/view?usp=sharing) into `utils` and unzip the model.
 
 
-<a id="#neural-pca"></a>
 
-## Class-wise Neural PCA 
-The folder `neural_pca` contains all code to compute the class-wise neural PCA components of ImageNet classes and corresponding visualisations. The script `neural_pca/example.py` shows how to compute the $\alpha$ values and visualisations for the top 10 components for a given class.
-
-<a id="#citation"></a>
+<a id="citation"></a>
 
 ## Citation 
 
