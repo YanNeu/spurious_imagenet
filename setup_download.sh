@@ -10,6 +10,6 @@ cd ../..
 # Download precomputed alpha values (for SpuFix)
 cd neural_pca
 wget https://nc.mlcloud.uni-tuebingen.de/index.php/s/4sfzFZcF3TKsWJ2/download/spurious_alphas_train.zip
-unzip spurious_alpha_train.zip
-rm spurious_alpha_train.zip
+unzip spurious_alphas_train.zip
+rm spurious_alphas_train.zip
 cd ..
